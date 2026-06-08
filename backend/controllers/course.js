@@ -3,11 +3,16 @@ const Enrollment = require("../models/Enrollment");
 const { errorHandler } = require('../auth');
 
 module.exports.addCourse = (req, res) => {
-    let newCourse = new Course({
-        name : req.body.name,
-        description : req.body.description,
-        price : req.body.price
-    });
+   let newCourse = new Course({
+       name: req.body.name,
+       description: req.body.description,
+       price: req.body.price,
+       category: req.body.category,
+       level: req.body.level,
+       duration: req.body.duration,
+       maxStudents: req.body.maxStudents,
+       imageUrl: req.body.imageUrl
+   });
 
     Course.findOne({ name: req.body.name })
     .then(existingCourse => {
@@ -77,7 +82,12 @@ module.exports.updateCourse = (req, res) => {
     let updatedCourse = {
         name: req.body.name,
         description: req.body.description,
-        price: req.body.price
+        price: req.body.price,
+        category: req.body.category,
+        level: req.body.level,
+        duration: req.body.duration,
+        maxStudents: req.body.maxStudents,
+        imageUrl: req.body.imageUrl
     };
     return Course.findByIdAndUpdate(req.params.courseId, updatedCourse)
     .then(course => {
