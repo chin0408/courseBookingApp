@@ -25,6 +25,10 @@ const courseSchema = new mongoose.Schema({
         type: String,
         default: '4 Weeks'
     },
+    maxStudents: {
+        type: Number,
+        default: 30
+    },
     imageUrl: {
         type: String,
         default: ''
