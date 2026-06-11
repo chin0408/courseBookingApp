@@ -53,10 +53,13 @@ export default {
                 <h3>{{ courseData.name }}</h3>
                 <p>{{ courseData.description }}</p>
 
-                <!-- Enrollment count -->
+                <!-- Enrollment & seats info -->
                 <div class="course-enrollment-count" v-if="courseData.enrollmentCount !== undefined">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     {{ courseData.enrollmentCount }} enrolled
+                    <span v-if="courseData.availableSeats !== null && courseData.availableSeats !== undefined">
+                        · {{ courseData.availableSeats > 0 ? courseData.availableSeats : 0 }} seats left
+                    </span>
                 </div>
 
                 <div class="course-card-footer">
@@ -64,19 +67,19 @@ export default {
                         ₱{{ Number(courseData.price).toLocaleString() }}
                     </span>
 
-                    <!-- FIX: Show Enroll if no seat limit, or if seats available -->
+                    <!-- Enroll button: show if not admin and seats available (or no limit set) -->
                     <button
-                        v-if="!user.isAdmin && (courseData.availableSeats === undefined || courseData.availableSeats > 0)"
+                        v-if="!user.isAdmin && (courseData.availableSeats === null || courseData.availableSeats === undefined || courseData.availableSeats > 0)"
                         class="btn-edit"
                         @click="handleEnroll"
                     >
                         Enroll
                     </button>
 
-                    <!-- Class Full only if seats field exists AND is 0 -->
+                    <!-- Class Full: show if seats are exhausted -->
                     <button
-                        v-else-if="!user.isAdmin && courseData.availableSeats === 0"
-                        class="btn-archive"
+                        v-else-if="!user.isAdmin && courseData.availableSeats !== null && courseData.availableSeats !== undefined && courseData.availableSeats <= 0"
+                        class="btn-archive btn-class-full"
                         disabled
                     >
                         Class Full

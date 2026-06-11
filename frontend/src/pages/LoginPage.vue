@@ -2,7 +2,7 @@
 
     import { watch, ref, onBeforeMount } from 'vue';
     import { Notyf } from 'notyf';
-    import axios from 'axios';
+    import api from '../api.js';
     import { useGlobalStore } from '../stores/global.js';
     import { useRouter } from 'vue-router';
 
@@ -24,7 +24,7 @@
         e.preventDefault();
 
         try {
-            let res = await axios.post(`${import.meta.env.VITE_COURSE_BOOKING_API}/users/login`, {
+            let res = await api.post('/users/login', {
                 email: email.value,
                 password: password.value
             });
@@ -39,7 +39,6 @@
             }
 
         } catch (e) {
-            // FIX: Guard against e.response being undefined (e.g. network down)
             if (e.response && (e.response.status === 404 || e.response.status === 401 || e.response.status === 400)) {
                 notyf.error(e.response.data.message);
             } else {

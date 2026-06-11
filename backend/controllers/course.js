@@ -34,11 +34,7 @@ module.exports.addCourse = (req, res) => {
 module.exports.getAllCourses = (req, res) => {
     return Course.find({})
     .then(result => {
-        if(result.length > 0) {
-            return res.status(200).send(result);
-        } else {
-            return res.status(404).send({ message: 'No courses found' });
-        }
+        return res.status(200).send(result);
     })
     .catch(error => errorHandler(error, req, res));
 };
@@ -46,11 +42,7 @@ module.exports.getAllCourses = (req, res) => {
 module.exports.getAllActive = (req, res) => {
     Course.find({ isActive: true })
     .then(result => {
-        if (result.length > 0) {
-            return res.status(200).send(result);
-        } else {
-            return res.status(200).send({ message: 'No active courses found' });
-        }
+        return res.status(200).send(result);
     })
     .catch(error => errorHandler(error, req, res));
 };

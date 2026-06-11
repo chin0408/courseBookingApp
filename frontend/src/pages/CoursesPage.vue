@@ -24,14 +24,18 @@
 
                     const courseList = response.data;
 
-                    // Fetch enrollment count for each course and attach it
+                    // Fetch enrollment count for each course and compute availableSeats
                     const withCounts = await Promise.all(
                         courseList.map(async (course) => {
                             try {
                                 const countRes = await api.get(`/courses/${course._id}/students`);
-                                return { ...course, enrollmentCount: countRes.data.studentCount || 0 };
+                                const enrollmentCount = countRes.data.studentCount || 0;
+                                const availableSeats = course.maxStudents != null
+                                    ? course.maxStudents - enrollmentCount
+                                    : null;
+                                return { ...course, enrollmentCount, availableSeats };
                             } catch {
-                                return { ...course, enrollmentCount: 0 };
+                                return { ...course, enrollmentCount: 0, availableSeats: course.maxStudents ?? null };
                             }
                         })
                     );
@@ -48,49 +52,21 @@
 
             async function archiveCourse(courseId) {
                 try {
-                    let response = await fetch(
-                        `${import.meta.env.VITE_COURSE_BOOKING_API}/courses/${courseId}/archive`,
-                        {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                Authorization: `Bearer ${store.user.token}`
-                            }
-                        }
-                    );
-                    let data = await response.json();
-                    if (response.ok) {
-                        notyf.success("Course Archived");
-                        getCourses();
-                    } else {
-                        notyf.error(data.message || "Something went wrong");
-                    }
+                    await api.delete(`/courses/${courseId}/archive`);
+                    notyf.success("Course Archived");
+                    getCourses();
                 } catch (error) {
-                    notyf.error("Something went wrong");
+                    notyf.error(error.response?.data?.message || "Something went wrong");
                 }
             }
 
             async function activateCourse(courseId) {
                 try {
-                    let response = await fetch(
-                        `${import.meta.env.VITE_COURSE_BOOKING_API}/courses/${courseId}/activate`,
-                        {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                Authorization: `Bearer ${store.user.token}`
-                            }
-                        }
-                    );
-                    let data = await response.json();
-                    if (response.ok) {
-                        notyf.success("Course Activated");
-                        getCourses();
-                    } else {
-                        notyf.error(data.message || "Something went wrong");
-                    }
+                    await api.patch(`/courses/${courseId}/activate`);
+                    notyf.success("Course Activated");
+                    getCourses();
                 } catch (error) {
-                    notyf.error("Something went wrong");
+                    notyf.error(error.response?.data?.message || "Something went wrong");
                 }
             }
 

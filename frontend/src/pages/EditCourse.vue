@@ -16,6 +16,7 @@
     const category = ref("Frontend");
     const level = ref("Beginner");
     const duration = ref("4 Weeks");
+    const maxStudents = ref(30);
     const imageUrl = ref("");
 
     const categoryOptions = ["Frontend","Backend","Full Stack","QA","Cloud","Mobile","DevOps","Data Science"];
@@ -31,6 +32,7 @@
             category.value = data.category || "Frontend";
             level.value = data.level || "Beginner";
             duration.value = data.duration || "4 Weeks";
+            maxStudents.value = data.maxStudents || 30;
             imageUrl.value = data.imageUrl || "";
         } catch (error) {
             notyf.error("Failed to load course data.");
@@ -39,34 +41,20 @@
 
     async function updateCourse() {
         try {
-            let response = await fetch(
-                `${import.meta.env.VITE_COURSE_BOOKING_API}/courses/${route.params.courseId}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${store.user.token}`
-                    },
-                    body: JSON.stringify({
-                        name: name.value,
-                        description: description.value,
-                        price: Number(price.value),
-                        category: category.value,
-                        level: level.value,
-                        duration: duration.value,
-                        imageUrl: imageUrl.value
-                    })
-                }
-            );
-            let data = await response.json();
-            if (response.ok) {
-                notyf.success("Course Updated Successfully");
-                router.push({ path: '/courses' });
-            } else {
-                notyf.error(data.message || "Something went wrong");
-            }
+            let { data } = await api.put(`/courses/${route.params.courseId}`, {
+                name: name.value,
+                description: description.value,
+                price: Number(price.value),
+                category: category.value,
+                level: level.value,
+                duration: duration.value,
+                maxStudents: Number(maxStudents.value),
+                imageUrl: imageUrl.value
+            });
+            notyf.success("Course Updated Successfully");
+            router.push({ path: '/courses' });
         } catch (error) {
-            notyf.error("Something went wrong");
+            notyf.error(error.response?.data?.message || "Something went wrong");
         }
     }
 </script>

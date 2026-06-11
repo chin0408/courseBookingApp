@@ -14,6 +14,7 @@ const price = ref(0);
 const category = ref("Frontend");
 const level = ref("Beginner");
 const duration = ref("4 Weeks");
+const maxStudents = ref(30);
 const imageUrl = ref("");
 
 const isEnabled = ref(false);
@@ -44,7 +45,7 @@ const durationOptions = [
 ];
 
 watch(
-    [name, description, price, category, level, duration, imageUrl],
+    [name, description, price, category, level, duration, maxStudents, imageUrl],
     (currentValue) => {
 
         if (
@@ -54,7 +55,8 @@ watch(
             currentValue[3] !== "" &&
             currentValue[4] !== "" &&
             currentValue[5] !== "" &&
-            currentValue[6] !== ""
+            currentValue[6] > 0 &&
+            currentValue[7] !== ""
         ) {
             isEnabled.value = true;
         } else {
@@ -75,6 +77,7 @@ async function handleSubmit(e) {
             category: category.value,
             level: level.value,
             duration: duration.value,
+            maxStudents: maxStudents.value,
             imageUrl: imageUrl.value
         });
 
@@ -88,6 +91,7 @@ async function handleSubmit(e) {
             category.value = "Frontend";
             level.value = "Beginner";
             duration.value = "4 Weeks";
+            maxStudents.value = 30;
             imageUrl.value = "";
 
             router.push({ path: '/courses' });
@@ -198,6 +202,22 @@ async function handleSubmit(e) {
                                     {{ option }}
                                 </option>
                             </select>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label">Maximum Students</label>
+
+                        <div class="field-wrap">
+                            <i class="bi bi-people field-icon"></i>
+
+                            <input
+                                type="number"
+                                min="1"
+                                class="field-input"
+                                v-model="maxStudents"
+                                placeholder="30"
+                            />
                         </div>
                     </div>
 
