@@ -36,6 +36,7 @@ import ViewCourse from './pages/ViewCourse.vue';
 import AddCourse from './pages/AddCourse.vue';
 import EditCourse from './pages/EditCourse.vue';
 import EnrollmentsPage from './pages/EnrollmentsPage.vue';
+import AdminEnrollments from './pages/AdminEnrollments.vue';
 
 
 
@@ -95,6 +96,11 @@ const router = createRouter({
             path: '/enrollments',
             name: 'Enrollments',
             component: EnrollmentsPage
+        },
+        {
+            path: '/admin/enrollments',
+            name: 'AdminEnrollments',
+            component: AdminEnrollments
         },
         {
             path: '/courses/:id',

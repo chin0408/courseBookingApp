@@ -1,6 +1,7 @@
 const Enrollment = require("../models/Enrollment");
 const { errorHandler } = require('../auth');
 const Course = require("../models/Course");
+const User = require("../models/User");
 
 module.exports.enroll = async (req, res) => {
 
@@ -86,4 +87,69 @@ module.exports.getEnrollments = (req, res) => {
         return res.status(404).send({ message: 'No enrolled courses' });
     })
     .catch(error => errorHandler(error, req, res));
+};
+
+module.exports.removeEnrollment = async (req, res) => {
+    try {
+        const enrollment = await Enrollment.findById(req.params.enrollmentId);
+
+        if (!enrollment) {
+            return res.status(404).send({ message: 'Enrollment not found' });
+        }
+
+        // Only allow the owner to remove their enrollment
+        if (enrollment.userId !== req.user.id) {
+            return res.status(403).send({ message: 'You can only remove your own enrollments' });
+        }
+
+        await Enrollment.findByIdAndDelete(req.params.enrollmentId);
+
+        return res.status(200).send({
+            success: true,
+            message: 'Enrollment removed successfully'
+        });
+
+    } catch (error) {
+        return errorHandler(error, req, res);
+    }
+};
+
+module.exports.getAllEnrollments = async (req, res) => {
+    try {
+        const enrollments = await Enrollment.find({});
+
+        // Enrich each enrollment with student and course details
+        const enriched = await Promise.all(
+            enrollments.map(async (enrollment) => {
+                const user = await User.findById(enrollment.userId).select('-password');
+                const courseId = enrollment.enrolledCourses[0]?.courseId;
+                const course = courseId ? await Course.findById(courseId) : null;
+
+                return {
+                    _id: enrollment._id,
+                    enrolledOn: enrollment.enrolledOn,
+                    totalPrice: enrollment.totalPrice,
+                    status: enrollment.status,
+                    student: user ? {
+                        _id: user._id,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        email: user.email,
+                        mobileNo: user.mobileNo
+                    } : null,
+                    course: course ? {
+                        _id: course._id,
+                        name: course.name,
+                        category: course.category,
+                        level: course.level,
+                        price: course.price
+                    } : null
+                };
+            })
+        );
+
+        return res.status(200).send(enriched);
+    } catch (error) {
+        return errorHandler(error, req, res);
+    }
 };

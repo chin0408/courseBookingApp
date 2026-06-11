@@ -21,6 +21,7 @@ const user = store.user;
                     <router-link :to="{ name: 'News' }" class="nav-link" v-if="!user.isAdmin && user.email">News</router-link>
                     <router-link :to="{ name: 'Profile' }" class="nav-link" v-if="user.email">Profile</router-link>
                     <router-link :to="{ path: '/addCourse' }" class="nav-link" v-if="user.isAdmin">Add Course</router-link>
+                    <router-link :to="{ name: 'AdminEnrollments' }" class="nav-link" v-if="user.isAdmin">Enrollments</router-link>
                     <router-link :to="{ name: 'Register' }" class="nav-link" v-if="!user.email">Register</router-link>
                     <router-link :to="{ name: 'Login' }" class="nav-link" v-if="!user.email">Login</router-link>
                     <router-link :to="{ name: 'Logout' }" class="nav-link nav-logout" v-else>Logout</router-link>

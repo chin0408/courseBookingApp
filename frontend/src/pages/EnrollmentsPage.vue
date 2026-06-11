@@ -12,6 +12,16 @@ const notyf = new Notyf();
 const enrollments = ref([]);
 const isLoading = ref(true);
 
+async function removeEnrollment(enrollmentId) {
+    try {
+        await api.delete(`/enrollments/${enrollmentId}`);
+        notyf.success("Enrollment removed");
+        enrollments.value = enrollments.value.filter(e => e._id !== enrollmentId);
+    } catch (error) {
+        notyf.error(error.response?.data?.message || "Failed to remove enrollment");
+    }
+}
+
 onMounted(async () => {
     if (!store.user.email || store.user.isAdmin) {
         router.push({ path: '/' });
@@ -20,22 +30,24 @@ onMounted(async () => {
 
     try {
         const { data } = await api.get('/enrollments/get-enrollments');
-        // Fetch course details for each enrollment
+
+        // Flatten: one entry per enrollment with course details attached
         const enriched = await Promise.all(
             data.map(async (enrollment) => {
-                const coursesWithDetails = await Promise.all(
-                    enrollment.enrolledCourses.map(async (ec) => {
-                        try {
-                            const courseRes = await api.get(`/courses/specific/${ec.courseId}`);
-                            return { ...ec, courseDetails: courseRes.data };
-                        } catch {
-                            return { ...ec, courseDetails: null };
-                        }
-                    })
-                );
-                return { ...enrollment, enrolledCourses: coursesWithDetails };
+                const courseId = enrollment.enrolledCourses[0]?.courseId;
+                let courseDetails = null;
+                if (courseId) {
+                    try {
+                        const courseRes = await api.get(`/courses/specific/${courseId}`);
+                        courseDetails = courseRes.data;
+                    } catch {
+                        courseDetails = null;
+                    }
+                }
+                return { ...enrollment, courseDetails };
             })
         );
+
         enrollments.value = enriched;
     } catch (error) {
         if (error.response?.status !== 404) {
@@ -48,7 +60,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="enrollments-shell">
+    <div class="courses-shell">
         <div class="section-header">
             <span class="dash-eyebrow">My Learning</span>
             <h1 class="section-title">My Enrolled Courses</h1>
@@ -72,23 +84,19 @@ onMounted(async () => {
                 :key="enrollment._id"
                 class="course-grid-item"
             >
-                <article
-                    v-for="ec in enrollment.enrolledCourses"
-                    :key="ec.courseId"
-                    class="course-card-modern"
-                >
-                    <div class="course-card-media" v-if="ec.courseDetails">
+                <article class="course-card-modern" v-if="enrollment.courseDetails">
+                    <div class="course-card-media">
                         <img
-                            :src="ec.courseDetails.imageUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3'"
-                            :alt="ec.courseDetails.name"
+                            :src="enrollment.courseDetails.imageUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3'"
+                            :alt="enrollment.courseDetails.name"
                             style="width:100%; height:220px; object-fit:cover;"
                         />
                         <span class="course-card-tag" style="background: var(--color-green);">Enrolled</span>
                     </div>
 
-                    <div class="course-card-body" v-if="ec.courseDetails">
-                        <h3>{{ ec.courseDetails.name }}</h3>
-                        <p>{{ ec.courseDetails.description }}</p>
+                    <div class="course-card-body">
+                        <h3>{{ enrollment.courseDetails.name }}</h3>
+                        <p>{{ enrollment.courseDetails.description }}</p>
 
                         <div class="course-card-footer">
                             <span class="price-badge">
@@ -102,9 +110,19 @@ onMounted(async () => {
                         <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--color-subtle);">
                             Enrolled on {{ new Date(enrollment.enrolledOn).toLocaleDateString() }}
                         </div>
-                    </div>
 
-                    <div class="course-card-body" v-else>
+                        <button
+                            class="btn-archive"
+                            style="margin-top: 0.75rem; font-size: 0.8rem;"
+                            @click="removeEnrollment(enrollment._id)"
+                        >
+                            Remove
+                        </button>
+                    </div>
+                </article>
+
+                <article class="course-card-modern" v-else>
+                    <div class="course-card-body">
                         <h3>Course Unavailable</h3>
                         <p>This course may have been removed.</p>
                     </div>
