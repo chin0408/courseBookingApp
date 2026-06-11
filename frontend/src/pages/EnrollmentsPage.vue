@@ -107,17 +107,17 @@ onMounted(async () => {
                             </span>
                         </div>
 
-                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--color-subtle);">
-                            Enrolled on {{ new Date(enrollment.enrolledOn).toLocaleDateString() }}
+                        <div style="margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.75rem; color: var(--color-subtle);">
+                                Enrolled on {{ new Date(enrollment.enrolledOn).toLocaleDateString() }}
+                            </span>
+                            <button
+                                style="font-size: 0.72rem; color: var(--color-red); background: none; border: none; cursor: pointer; padding: 0.25rem 0; text-decoration: underline; opacity: 0.7;"
+                                @click="removeEnrollment(enrollment._id)"
+                            >
+                                Remove
+                            </button>
                         </div>
-
-                        <button
-                            class="btn-archive"
-                            style="margin-top: 0.5rem; font-size: 0.75rem; padding: 0.4rem 0.8rem;"
-                            @click="removeEnrollment(enrollment._id)"
-                        >
-                            Remove
-                        </button>
                     </div>
                 </article>
 
