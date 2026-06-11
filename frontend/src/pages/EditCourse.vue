@@ -16,6 +16,7 @@
     const category = ref("Frontend");
     const level = ref("Beginner");
     const duration = ref("4 Weeks");
+    const maxStudents = ref(30);
     const imageUrl = ref("");
 
     const categoryOptions = ["Frontend","Backend","Full Stack","QA","Cloud","Mobile","DevOps","Data Science"];
@@ -31,6 +32,7 @@
             category.value = data.category || "Frontend";
             level.value = data.level || "Beginner";
             duration.value = data.duration || "4 Weeks";
+            maxStudents.value = data.maxStudents || 30;
             imageUrl.value = data.imageUrl || "";
         } catch (error) {
             notyf.error("Failed to load course data.");
@@ -46,6 +48,7 @@
                 category: category.value,
                 level: level.value,
                 duration: duration.value,
+                maxStudents: Number(maxStudents.value),
                 imageUrl: imageUrl.value
             });
             notyf.success("Course Updated Successfully");
