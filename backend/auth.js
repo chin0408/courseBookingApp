@@ -1,13 +1,22 @@
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
 
+// Validate required environment variables on startup
+const requiredEnvVars = ['JWT_SECRET_KEY', 'MONGODB_STRING'];
+for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+        console.error(`ERROR: Missing required environment variable: ${envVar}`);
+        process.exit(1);
+    }
+}
+
 module.exports.createAccessToken = (user) => {
     const data = {
         id : user._id,
         email : user.email,
         isAdmin : user.isAdmin
     };
-    return jwt.sign(data, process.env.JWT_SECRET_KEY, {});
+    return jwt.sign(data, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
 };
 
 module.exports.verify = (req, res, next) => {

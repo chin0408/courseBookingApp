@@ -3,18 +3,40 @@ const Enrollment = require("../models/Enrollment");
 const { errorHandler } = require('../auth');
 
 module.exports.addCourse = (req, res) => {
-   let newCourse = new Course({
-       name: req.body.name,
-       description: req.body.description,
-       price: req.body.price,
-       category: req.body.category,
-       level: req.body.level,
-       duration: req.body.duration,
-       maxStudents: req.body.maxStudents,
-       imageUrl: req.body.imageUrl
-   });
+    const { name, description, price, category, level, duration, maxStudents, imageUrl } = req.body;
 
-    Course.findOne({ name: req.body.name })
+    // Validate required fields
+    if (!name || !name.trim()) {
+        return res.status(400).send({ message: 'Course name is required' });
+    }
+    if (!description || !description.trim()) {
+        return res.status(400).send({ message: 'Course description is required' });
+    }
+    if (price == null || price <= 0) {
+        return res.status(400).send({ message: 'Price must be a positive number' });
+    }
+    if (maxStudents != null && (maxStudents <= 0 || !Number.isInteger(maxStudents))) {
+        return res.status(400).send({ message: 'Max students must be a positive whole number' });
+    }
+    if (name.trim().length > 100) {
+        return res.status(400).send({ message: 'Course name must not exceed 100 characters' });
+    }
+    if (description.trim().length > 1000) {
+        return res.status(400).send({ message: 'Description must not exceed 1000 characters' });
+    }
+
+    let newCourse = new Course({
+        name: name.trim(),
+        description: description.trim(),
+        price,
+        category: category || 'Frontend',
+        level: level || 'Beginner',
+        duration: duration || '4 Weeks',
+        maxStudents: maxStudents || 30,
+        imageUrl: imageUrl || ''
+    });
+
+    Course.findOne({ name: name.trim() })
     .then(existingCourse => {
         if (existingCourse) {
             return res.status(409).send({ message: 'Course already exists' });
@@ -71,15 +93,37 @@ module.exports.getCourseStudentCount = (req, res) => {
 };
 
 module.exports.updateCourse = (req, res) => {
+    const { name, description, price, category, level, duration, maxStudents, imageUrl } = req.body;
+
+    // Validate required fields
+    if (!name || !name.trim()) {
+        return res.status(400).send({ message: 'Course name is required' });
+    }
+    if (!description || !description.trim()) {
+        return res.status(400).send({ message: 'Course description is required' });
+    }
+    if (price == null || price <= 0) {
+        return res.status(400).send({ message: 'Price must be a positive number' });
+    }
+    if (maxStudents != null && (maxStudents <= 0 || !Number.isInteger(maxStudents))) {
+        return res.status(400).send({ message: 'Max students must be a positive whole number' });
+    }
+    if (name.trim().length > 100) {
+        return res.status(400).send({ message: 'Course name must not exceed 100 characters' });
+    }
+    if (description.trim().length > 1000) {
+        return res.status(400).send({ message: 'Description must not exceed 1000 characters' });
+    }
+
     let updatedCourse = {
-        name: req.body.name,
-        description: req.body.description,
-        price: req.body.price,
-        category: req.body.category,
-        level: req.body.level,
-        duration: req.body.duration,
-        maxStudents: req.body.maxStudents,
-        imageUrl: req.body.imageUrl
+        name: name.trim(),
+        description: description.trim(),
+        price,
+        category,
+        level,
+        duration,
+        maxStudents,
+        imageUrl
     };
     return Course.findByIdAndUpdate(req.params.courseId, updatedCourse)
     .then(course => {

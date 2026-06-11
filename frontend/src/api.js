@@ -34,4 +34,18 @@ api.interceptors.request.use((config) => {
 
 })
 
+// Response interceptor - handles expired tokens globally
+api.interceptors.response.use(
+	(response) => response,
+	(error) => {
+		// If token is expired or invalid, clear storage and redirect to login
+		if (error.response && error.response.status === 403 &&
+			error.response.data?.message === 'jwt expired') {
+			localStorage.removeItem("token");
+			window.location.href = '/login';
+		}
+		return Promise.reject(error);
+	}
+)
+
 export default api;

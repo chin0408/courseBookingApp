@@ -17,6 +17,7 @@ const user = store.user;
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav ms-auto app-nav-links">
                     <router-link :to="{ name: 'Courses' }" class="nav-link">Courses</router-link>
+                    <router-link :to="{ name: 'Enrollments' }" class="nav-link" v-if="!user.isAdmin && user.email">My Courses</router-link>
                     <router-link :to="{ name: 'News' }" class="nav-link" v-if="!user.isAdmin && user.email">News</router-link>
                     <router-link :to="{ name: 'Profile' }" class="nav-link" v-if="user.email">Profile</router-link>
                     <router-link :to="{ path: '/addCourse' }" class="nav-link" v-if="user.isAdmin">Add Course</router-link>

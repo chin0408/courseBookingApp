@@ -1,6 +1,6 @@
 <script>
     import api from '../api.js';
-    import { reactive, watch } from 'vue';
+    import { reactive, ref, watch } from 'vue';
     import AdminView from '../components/AdminView.vue';
     import UserView from '../components/UserView.vue';
     import { useRouter } from 'vue-router';
@@ -15,8 +15,10 @@
             const store = useGlobalStore();
             const notyf = new Notyf();
             const courses = reactive({ data: [] });
+            const isLoading = ref(true);
 
             async function getCourses() {
+                isLoading.value = true;
                 try {
                     let response = store.user.isAdmin
                         ? await api.get('/courses/all')
@@ -43,6 +45,8 @@
                     courses.data = withCounts;
                 } catch (error) {
                     console.log(error);
+                } finally {
+                    isLoading.value = false;
                 }
             }
 
@@ -76,21 +80,24 @@
                 { immediate: true, deep: true }
             );
 
-            return { store, courses, editCourse, archiveCourse, activateCourse };
+            return { store, courses, isLoading, editCourse, archiveCourse, activateCourse };
         }
     }
 </script>
 
 <template>
+    <div v-if="isLoading" class="empty-state" style="padding: 4rem 2rem; text-align: center;">
+        Loading courses...
+    </div>
     <AdminView
-        v-if="store.user.isAdmin"
+        v-else-if="store.user.isAdmin"
         :coursesData="courses.data"
         :editCourse="editCourse"
         :archiveCourse="archiveCourse"
         :activateCourse="activateCourse"
     />
     <UserView
-        v-if="!store.user.isAdmin"
+        v-else
         :coursesData="courses.data"
     />
 </template>

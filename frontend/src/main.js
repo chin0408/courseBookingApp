@@ -35,6 +35,7 @@ import ProfilePage from './pages/ProfilePage.vue';
 import ViewCourse from './pages/ViewCourse.vue';
 import AddCourse from './pages/AddCourse.vue';
 import EditCourse from './pages/EditCourse.vue';
+import EnrollmentsPage from './pages/EnrollmentsPage.vue';
 
 
 
@@ -89,6 +90,11 @@ const router = createRouter({
             path: '/profile',
             name: 'Profile',
             component: ProfilePage
+        },
+        {
+            path: '/enrollments',
+            name: 'Enrollments',
+            component: EnrollmentsPage
         },
         {
             path: '/courses/:id',

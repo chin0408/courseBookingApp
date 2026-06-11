@@ -31,6 +31,31 @@ module.exports.enroll = async (req, res) => {
             });
         }
 
+        // Check for duplicate enrollment
+        const existingEnrollment = await Enrollment.findOne({
+            userId: req.user.id,
+            "enrolledCourses.courseId": courseId
+        });
+
+        if (existingEnrollment) {
+            return res.status(409).send({
+                message: 'You are already enrolled in this course'
+            });
+        }
+
+        // Check seat availability
+        if (course.maxStudents != null) {
+            const enrollmentCount = await Enrollment.countDocuments({
+                "enrolledCourses.courseId": courseId
+            });
+
+            if (enrollmentCount >= course.maxStudents) {
+                return res.status(400).send({
+                    message: 'This class is full. No seats available.'
+                });
+            }
+        }
+
         let newEnrollment =
             new Enrollment({
                 userId: req.user.id,
