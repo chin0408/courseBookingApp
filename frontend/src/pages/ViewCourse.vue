@@ -11,6 +11,7 @@
     const notyf = new Notyf();
     const course = reactive({ data: {} });
     const enrollmentCount = ref(0);
+    const availableSeats = ref(null);
     const isEnrolling = ref(false);
 
     async function handleEnroll() {
@@ -48,6 +49,13 @@
 
             enrollmentCount.value =
                 countRes.data.studentCount || 0;
+
+            // Calculate available seats
+            if (data.maxStudents != null) {
+                availableSeats.value = data.maxStudents - enrollmentCount.value;
+            } else {
+                availableSeats.value = null;
+            }
 
         } catch (error) {
             console.log(error);
@@ -104,7 +112,7 @@
 
                 <div class="vc-divider"></div>
 
-                <!-- Enrollment count — prominent -->
+                <!-- Enrollment count & seats left -->
                 <div class="vc-enrollment-box">
                     <div class="vc-enrollment-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -115,6 +123,16 @@
                     </div>
                 </div>
 
+                <div class="vc-enrollment-box" v-if="availableSeats !== null">
+                    <div class="vc-enrollment-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    </div>
+                    <div>
+                        <span class="vc-enrollment-count" :style="availableSeats <= 0 ? 'color: #e53935' : ''">{{ availableSeats > 0 ? availableSeats : 0 }}</span>
+                        <span class="vc-enrollment-label">{{ availableSeats <= 0 ? 'no seats left' : 'seats left' }}</span>
+                    </div>
+                </div>
+
                 <div class="vc-divider"></div>
 
                 <h6 class="vc-desc-label">About this course</h6>
@@ -122,8 +140,19 @@
 
                 <!-- Actions -->
                 <div class="vc-actions">
+                    <!-- Class Full notice -->
+                    <div
+                        v-if="user.email && !user.isAdmin && course.data?.isActive && availableSeats !== null && availableSeats <= 0"
+                        class="vc-admin-notice"
+                        style="color: #e53935;"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        This class is full. No seats available.
+                    </div>
+
+                    <!-- Enroll button: only when active AND seats available -->
                     <button
-                        v-if="user.email && !user.isAdmin && course.data?.isActive"
+                        v-if="user.email && !user.isAdmin && course.data?.isActive && (availableSeats === null || availableSeats > 0)"
                         class="vc-enroll-btn"
                         :class="{ 'vc-btn-loading': isEnrolling }"
                         @click="handleEnroll"

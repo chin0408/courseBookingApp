@@ -24,14 +24,18 @@
 
                     const courseList = response.data;
 
-                    // Fetch enrollment count for each course and attach it
+                    // Fetch enrollment count for each course and compute availableSeats
                     const withCounts = await Promise.all(
                         courseList.map(async (course) => {
                             try {
                                 const countRes = await api.get(`/courses/${course._id}/students`);
-                                return { ...course, enrollmentCount: countRes.data.studentCount || 0 };
+                                const enrollmentCount = countRes.data.studentCount || 0;
+                                const availableSeats = course.maxStudents != null
+                                    ? course.maxStudents - enrollmentCount
+                                    : null;
+                                return { ...course, enrollmentCount, availableSeats };
                             } catch {
-                                return { ...course, enrollmentCount: 0 };
+                                return { ...course, enrollmentCount: 0, availableSeats: course.maxStudents ?? null };
                             }
                         })
                     );
