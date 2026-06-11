@@ -39,34 +39,19 @@
 
     async function updateCourse() {
         try {
-            let response = await fetch(
-                `${import.meta.env.VITE_COURSE_BOOKING_API}/courses/${route.params.courseId}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${store.user.token}`
-                    },
-                    body: JSON.stringify({
-                        name: name.value,
-                        description: description.value,
-                        price: Number(price.value),
-                        category: category.value,
-                        level: level.value,
-                        duration: duration.value,
-                        imageUrl: imageUrl.value
-                    })
-                }
-            );
-            let data = await response.json();
-            if (response.ok) {
-                notyf.success("Course Updated Successfully");
-                router.push({ path: '/courses' });
-            } else {
-                notyf.error(data.message || "Something went wrong");
-            }
+            let { data } = await api.put(`/courses/${route.params.courseId}`, {
+                name: name.value,
+                description: description.value,
+                price: Number(price.value),
+                category: category.value,
+                level: level.value,
+                duration: duration.value,
+                imageUrl: imageUrl.value
+            });
+            notyf.success("Course Updated Successfully");
+            router.push({ path: '/courses' });
         } catch (error) {
-            notyf.error("Something went wrong");
+            notyf.error(error.response?.data?.message || "Something went wrong");
         }
     }
 </script>

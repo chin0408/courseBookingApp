@@ -4,6 +4,7 @@
     import {Notyf} from 'notyf';
 
     import {useGlobalStore} from '../stores/global';
+    import api from '../api.js';
 
     const store = useGlobalStore();
 
@@ -29,48 +30,30 @@
 
         try{
 
-            let response = await fetch(`${import.meta.env.VITE_COURSE_BOOKING_API}/users/profile`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${store.user.token}`
-                },
-                body: JSON.stringify({
-                    firstName: firstName.value,
-                    lastName: lastName.value,
-                    mobileNo: mobileNo.value
-                })
-            })
+            let { data } = await api.put('/users/profile', {
+                firstName: firstName.value,
+                lastName: lastName.value,
+                mobileNo: mobileNo.value
+            });
 
-            let data = await response.json();
+            notyf.success("Profile updated successfully!");
 
-            if(response.ok){
+            store.user.firstName = firstName.value;
+            store.user.lastName = lastName.value;
+            store.user.mobileNo = mobileNo.value;
 
-                notyf.success("Profile updated successfully!");
+            await store.getUserDetails(store.user.token);
 
-                store.user.firstName = firstName.value;
-                store.user.lastName = lastName.value;
-                store.user.mobileNo = mobileNo.value;
-
-                await store.getUserDetails(store.user.token);
-
-                firstName.value = "";
-                lastName.value = "";
-                mobileNo.value = "";
-
-            }else{
-                notyf.error(data.message || "Profile update failed.");
-            }
+            firstName.value = "";
+            lastName.value = "";
+            mobileNo.value = "";
 
         }catch(error){
 
             console.log(error);
 
-            notyf.error("Something went wrong while updating your profile.");
-
-        }finally{
-
-            console.log("Update profile request finished");
+            const msg = error.response?.data?.message || "Something went wrong while updating your profile.";
+            notyf.error(msg);
 
         }
 

@@ -57,25 +57,11 @@
 
     async function archiveCourse(courseId) {
         try {
-            let response = await fetch(
-                `${import.meta.env.VITE_COURSE_BOOKING_API}/courses/${courseId}/archive`,
-                {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${user.token}`
-                    }
-                }
-            );
-            let data = await response.json();
-            if (response.ok) {
-                notyf.success("Course Archived");
-                courses.value = courses.value.filter(c => c._id !== courseId);
-            } else {
-                notyf.error(data.message || "Something went wrong");
-            }
+            let { data } = await api.delete(`/courses/${courseId}/archive`);
+            notyf.success("Course Archived");
+            courses.value = courses.value.filter(c => c._id !== courseId);
         } catch (error) {
-            notyf.error("Something went wrong");
+            notyf.error(error.response?.data?.message || "Something went wrong");
         }
     }
 </script>

@@ -11,6 +11,7 @@ export const useGlobalStore = defineStore('global', () => {
 
     // Data (Global Variable)
     let user = reactive({
+        id: null,
         token: localStorage.getItem('token'),
         firstName: null,
         lastName: null,
@@ -24,6 +25,7 @@ export const useGlobalStore = defineStore('global', () => {
 
         // If the token does not exist, treat the user logged out
         if (!token) {
+            user.id = null;
             user.token = null;
             user.firstName = null;
             user.lastName = null;
@@ -45,6 +47,7 @@ export const useGlobalStore = defineStore('global', () => {
         )
 
         // Save user details in the global state
+        user.id = data._id;
         user.token = token;
         user.firstName = data.firstName;
         user.lastName = data.lastName;

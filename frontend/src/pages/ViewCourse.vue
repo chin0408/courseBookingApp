@@ -1,5 +1,5 @@
 <script setup>
-    import { onBeforeMount, reactive, ref, watch } from 'vue';
+    import { reactive, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import api from '../api.js';
     import { useGlobalStore } from '../stores/global';
@@ -34,19 +34,6 @@
         }
     }
 
-    onBeforeMount(async () => {
-        try {
-            let { data } = await api.get(`/courses/specific/${route.params.id}`);
-            course.data = data;
-
-            // Fetch enrollment count for this course
-            let countRes = await api.get(`/courses/${data._id}/students`);
-            enrollmentCount.value = countRes.data.studentCount || 0;
-        } catch (e) {
-            console.log(e);
-        }
-    });
-
     async function fetchCourse() {
         try {
             const { data } = await api.get(
@@ -67,7 +54,7 @@
         }
     }
 
-    onBeforeMount(fetchCourse);
+    fetchCourse();
 
     watch(
         () => route.params.id,
