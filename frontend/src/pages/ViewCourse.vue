@@ -1,5 +1,5 @@
 <script setup>
-    import { reactive, ref, watch } from 'vue';
+    import { reactive, ref, watch, onMounted } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import api from '../api.js';
     import { useGlobalStore } from '../stores/global';
@@ -13,6 +13,7 @@
     const enrollmentCount = ref(0);
     const availableSeats = ref(null);
     const isEnrolling = ref(false);
+
 
     async function handleEnroll() {
         if (isEnrolling.value) return;
@@ -52,7 +53,10 @@
 
             // Calculate available seats
             if (data.maxStudents != null) {
-                availableSeats.value = data.maxStudents - enrollmentCount.value;
+                availableSeats.value = Math.max(
+                    data.maxStudents - enrollmentCount.value,
+                    0
+                );
             } else {
                 availableSeats.value = null;
             }
@@ -62,7 +66,7 @@
         }
     }
 
-    fetchCourse();
+    onMounted(fetchCourse);
 
     watch(
         () => route.params.id,
@@ -142,7 +146,7 @@
                 <div class="vc-actions">
                     <!-- Class Full notice -->
                     <div
-                        v-if="user.email && !user.isAdmin && course.data?.isActive && availableSeats !== null && availableSeats <= 0"
+                        v-if="course.data?.isActive && availableSeats !== null && availableSeats <= 0"
                         class="vc-admin-notice"
                         style="color: #e53935;"
                     >
@@ -150,16 +154,33 @@
                         This class is full. No seats available.
                     </div>
 
-                    <!-- Enroll button: only when active AND seats available -->
+                    <!-- Student can enroll -->
                     <button
-                        v-if="user.email && !user.isAdmin && course.data?.isActive && (availableSeats === null || availableSeats > 0)"
-                        class="vc-enroll-btn"
-                        :class="{ 'vc-btn-loading': isEnrolling }"
+                        v-if="
+                            user.email &&
+                            !user.isAdmin &&
+                            course.data?.isActive &&
+                            (availableSeats === null || availableSeats > 0)
+                        "
+                        class="enroll-btn"
                         @click="handleEnroll"
-                        :disabled="isEnrolling"
                     >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                        {{ isEnrolling ? 'Enrolling...' : 'Enroll Now' }}
+                        Enroll Now
+                    </button>
+
+                    <!-- Course Full -->
+                    <button
+                        v-if="
+                            user.email &&
+                            !user.isAdmin &&
+                            course.data?.isActive &&
+                            availableSeats !== null &&
+                            availableSeats <= 0
+                        "
+                        class="enroll-btn disabled"
+                        disabled
+                    >
+                        Class Full
                     </button>
 
                     <div

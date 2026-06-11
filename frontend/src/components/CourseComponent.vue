@@ -67,22 +67,12 @@ export default {
                         ₱{{ Number(courseData.price).toLocaleString() }}
                     </span>
 
-                    <!-- Enroll button: show if not admin and seats available (or no limit set) -->
                     <button
-                        v-if="!user.isAdmin && (courseData.availableSeats === null || courseData.availableSeats === undefined || courseData.availableSeats > 0)"
+                        v-if="!user.isAdmin"
                         class="btn-edit"
                         @click="handleEnroll"
                     >
-                        Enroll
-                    </button>
-
-                    <!-- Class Full: show if seats are exhausted -->
-                    <button
-                        v-else-if="!user.isAdmin && courseData.availableSeats !== null && courseData.availableSeats !== undefined && courseData.availableSeats <= 0"
-                        class="btn-archive btn-class-full"
-                        disabled
-                    >
-                        Class Full
+                        View Details
                     </button>
                 </div>
 

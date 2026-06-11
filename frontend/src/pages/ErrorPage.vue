@@ -1,5 +1,3 @@
-
-
 <script>
   import BannerComponent from '../components/BannerComponent.vue';
 
